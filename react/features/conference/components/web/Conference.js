@@ -4,33 +4,31 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { connect as reactReduxConnect } from 'react-redux';
 
-import VideoLayout from '../../../../../modules/UI/videolayout/VideoLayout';
+import VideoLayout from '../../../../modules/UI/videolayout/VideoLayout';
 
-import { obtainConfig } from '../../../base/config';
-import { connect, disconnect } from '../../../base/connection';
-import { translate } from '../../../base/i18n';
-import { Chat } from '../../../chat';
-import { Filmstrip } from '../../../filmstrip';
-import { CalleeInfoContainer } from '../../../invite';
-import { LargeVideo } from '../../../large-video';
-import { NotificationsContainer } from '../../../notifications';
+import { obtainConfig } from '../../base/config';
+import { connect, disconnect } from '../../base/connection';
+import { translate } from '../../base/i18n';
+import { Filmstrip } from '../../filmstrip';
+import { CalleeInfoContainer } from '../../invite';
+import { LargeVideo } from '../../large-video';
+import { NotificationsContainer } from '../../notifications';
+import { SidePanel } from '../../side-panel';
 import {
     LAYOUTS,
     getCurrentLayout,
     shouldDisplayTileView
-} from '../../../video-layout';
+} from '../../video-layout';
 
+import { default as Notice } from './Notice';
 import {
     Toolbox,
     fullScreenChanged,
     setToolboxAlwaysVisible,
     showToolbox
-} from '../../../toolbox';
+} from '../../toolbox';
 
-import { maybeShowSuboptimalExperienceNotification } from '../../functions';
-
-import Labels from './Labels';
-import { default as Notice } from './Notice';
+import { maybeShowSuboptimalExperienceNotification } from '../functions';
 
 declare var APP: Object;
 declare var config: Object;
@@ -184,6 +182,7 @@ class Conference extends Component<Props> {
      * @inheritdoc
      */
     componentWillUnmount() {
+        APP.UI.unregisterListeners();
         APP.UI.unbindEvents();
 
         FULL_SCREEN_EVENTS.forEach(name =>
@@ -218,14 +217,13 @@ class Conference extends Component<Props> {
                 onMouseMove = { this._onShowToolbar }>
                 <Notice />
                 <div id = 'videospace'>
-                    <LargeVideo />
-                    { hideVideoQualityLabel
-                        || <Labels /> }
+                    <LargeVideo
+                        hideVideoQualityLabel = { hideVideoQualityLabel } />
                     <Filmstrip filmstripOnly = { filmstripOnly } />
                 </div>
 
                 { filmstripOnly || <Toolbox /> }
-                { filmstripOnly || <Chat /> }
+                { filmstripOnly || <SidePanel /> }
 
                 <NotificationsContainer />
 

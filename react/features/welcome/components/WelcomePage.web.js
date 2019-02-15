@@ -1,5 +1,9 @@
 /* global interfaceConfig */
 
+import Button from '@atlaskit/button';
+import { FieldTextStateless } from '@atlaskit/field-text';
+import Tabs from '@atlaskit/tabs';
+import { AtlasKitThemeProvider } from '@atlaskit/theme';
 import React from 'react';
 import { connect } from 'react-redux';
 
@@ -10,7 +14,6 @@ import { RecentList } from '../../recent-list';
 import { SettingsButton, SETTINGS_TABS } from '../../settings';
 
 import { AbstractWelcomePage, _mapStateToProps } from './AbstractWelcomePage';
-import Tabs from './Tabs';
 
 /**
  * The Web container rendering the welcome page.
@@ -115,60 +118,58 @@ class WelcomePage extends AbstractWelcomePage {
         const showAdditionalContent = this._shouldShowAdditionalContent();
 
         return (
-            <div
-                className = { `welcome ${showAdditionalContent
-                    ? 'with-content' : 'without-content'}` }
-                id = 'welcome_page'>
-                <div className = 'welcome-watermark'>
-                    <Watermarks />
-                </div>
-                <div className = 'header'>
-                    <div className = 'welcome-page-settings'>
-                        <SettingsButton
-                            defaultTab = { SETTINGS_TABS.CALENDAR } />
+            <AtlasKitThemeProvider mode = 'light'>
+                <div
+                    className = { `welcome ${showAdditionalContent
+                        ? 'with-content' : 'without-content'}` }
+                    id = 'welcome_page'>
+                    <div className = 'welcome-watermark'>
+                        <Watermarks />
                     </div>
-                    <div className = 'header-image' />
-                    <div className = 'header-text'>
-                        <h1 className = 'header-text-title'>
-                            { t('welcomepage.title') }
-                        </h1>
-                        <p className = 'header-text-description'>
-                            { t('welcomepage.appDescription',
-                                { app: APP_NAME }) }
-                        </p>
-                    </div>
-                    <div id = 'enter_room'>
-                        <div className = 'enter-room-input-container'>
-                            <div className = 'enter-room-title'>
-                                { t('welcomepage.enterRoomTitle') }
-                            </div>
-                            <form onSubmit = { this._onFormSubmit }>
-                                <input
+                    <div className = 'header'>
+                        <div className = 'header-image' />
+                        <div className = 'header-text'>
+                            <h1 className = 'header-text-title'>
+                                { t('welcomepage.title') }
+                            </h1>
+                            <p className = 'header-text-description'>
+                                { t('welcomepage.appDescription',
+                                    { app: APP_NAME }) }
+                            </p>
+                        </div>
+                        <div id = 'enter_room'>
+                            <form
+                                className = 'enter-room-input'
+                                onSubmit = { this._onFormSubmit }>
+                                <FieldTextStateless
                                     autoFocus = { true }
-                                    className = 'enter-room-input'
                                     id = 'enter_room_field'
+                                    isLabelHidden = { true }
+                                    label = 'enter_room_field'
                                     onChange = { this._onRoomChange }
-                                    placeholder
-                                        = { this.state.roomPlaceholder }
+                                    placeholder = 'Enter meeting space'
+                                    shouldFitContainer = { true }
                                     type = 'text'
                                     value = { this.state.room } />
                             </form>
+                            <Button
+                                appearance = 'primary'
+                                className = 'welcome-page-button'
+                                id = 'enter_room_button'
+                                onClick = { this._onJoin }
+                                type = 'button'>
+                                { t('welcomepage.go') }
+                            </Button>
                         </div>
-                        <div
-                            className = 'welcome-page-button'
-                            id = 'enter_room_button'
-                            onClick = { this._onJoin }>
-                            { t('welcomepage.go') }
-                        </div>
+                        { this._renderTabs() }
                     </div>
-                    { this._renderTabs() }
+                    { showAdditionalContent
+                        ? <div
+                            className = 'welcome-page-content'
+                            ref = { this._setAdditionalContentRef } />
+                        : null }
                 </div>
-                { showAdditionalContent
-                    ? <div
-                        className = 'welcome-page-content'
-                        ref = { this._setAdditionalContentRef } />
-                    : null }
-            </div>
+            </AtlasKitThemeProvider>
         );
     }
 
@@ -202,12 +203,14 @@ class WelcomePage extends AbstractWelcomePage {
     /**
      * Callback invoked when the desired tab to display should be changed.
      *
+     * @param {Object} tab - The configuration passed into atlaskit tabs to
+     * describe how to display the selected tab.
      * @param {number} tabIndex - The index of the tab within the array of
      * displayed tabs.
      * @private
      * @returns {void}
      */
-    _onTabSelected(tabIndex) {
+    _onTabSelected(tab, tabIndex) { // eslint-disable-line no-unused-vars
         this.setState({ selectedTab: tabIndex });
     }
 
@@ -238,14 +241,20 @@ class WelcomePage extends AbstractWelcomePage {
 
         tabs.push({
             label: t('welcomepage.recentList'),
-            content: <RecentList />
+            content: <RecentList />,
+            defaultSelected: !CalendarList
         });
 
         return (
-            <Tabs
-                onSelect = { this._onTabSelected }
-                selected = { this.state.selectedTab }
-                tabs = { tabs } />);
+            <div className = 'tab-container' >
+                <div className = 'welcome-page-settings'>
+                    <SettingsButton defaultTab = { SETTINGS_TABS.CALENDAR } />
+                </div>
+                <Tabs
+                    onSelect = { this._onTabSelected }
+                    selected = { this.state.selectedTab }
+                    tabs = { tabs } />
+            </div>);
     }
 
     /**
